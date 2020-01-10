@@ -21,6 +21,7 @@
 		</dependencies>
 	</dependencyManagement>
 
+
 	<dependencies>
 
 		<!-- starter-web：spring-webmvc + autoconfigure + logback + yaml + tomcat -->
@@ -75,39 +76,59 @@
 
 	</dependencies>
 
+
+	<!--加载proguard的混淆插件，通过mvn package 打包即可-->
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>com.github.wvengen</groupId>
+				<artifactId>proguard-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals><goal>proguard</goal></goals>
+					</execution>
+				</executions>
+				<configuration>
+					<proguardVersion>5.3.3</proguardVersion>
+					<injar>${project.build.finalName}.jar</injar>
+					<outjar>${project.build.finalName}.jar</outjar>
+					<obfuscate>true</obfuscate>
+					<proguardInclude>${project.basedir}/proguard.cfg</proguardInclude>
+					<libs>
+						<!-- Include main JAVA library required.-->
+						<lib>${java.home}/lib/rt.jar</lib>
+						<!-- Include crypto JAVA library if necessary.-->
+						<lib>${java.home}/lib/jce.jar</lib>
+					</libs>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>net.sf.proguard</groupId>
+						<artifactId>proguard-base</artifactId>
+						<version>5.3.3</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${spring-boot.version}</version>
 				<executions>
 					<execution>
 						<goals>
 							<goal>repackage</goal>
 						</goals>
+						<configuration>
+							<mainClass>com.xxl.job.admin.XxlJobAdminApplication</mainClass>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-			<!-- docker -->
-			<plugin>
-				<groupId>com.spotify</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.4.13</version>
-				<configuration>
-					<!-- made of '[a-z0-9-_.]' -->
-					<imageName>${project.artifactId}:${project.version}</imageName>
-					<dockerDirectory>${project.basedir}</dockerDirectory>
-					<resources>
-						<resource>
-							<targetPath>/</targetPath>
-							<directory>${project.build.directory}</directory>
-							<include>${project.build.finalName}.jar</include>
-						</resource>
-					</resources>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
+
+
+
+
 
 </project>
